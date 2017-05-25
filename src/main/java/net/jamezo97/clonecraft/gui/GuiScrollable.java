@@ -50,7 +50,7 @@ public abstract class GuiScrollable extends Gui{
 		try 
 		{
 			frameBuffer = new FrameBuffer((int)((width-scrollBarWidth))*2, (int)((height))*2);
-			frameBuffer.setClearColour(0x00000000);
+			frameBuffer.setClearColour(0xff000000);
 			useFrameBuffer = true;
 		}
 		catch (Exception e) 

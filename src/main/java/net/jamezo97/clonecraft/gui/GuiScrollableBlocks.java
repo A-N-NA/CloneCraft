@@ -110,6 +110,8 @@ public class GuiScrollableBlocks extends GuiScrollable
 	@Override
 	public void renderEntry(int entryIndex, int width, int height, int mX, int mY)
 	{
+		if(true)
+		return;
 		long blockId = viewable.get(entryIndex);
 
 		int colour = bc.getColourFor(blockId);

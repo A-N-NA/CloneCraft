@@ -40,7 +40,7 @@ public class GuiChooseBlocksToBreak extends GuiScreen {
 		
 
 		
-		if(scrollable.useFrameBuffer)
+		if(scrollable == null || scrollable.useFrameBuffer)
 		{
 			mc.renderEngine.bindTexture(backgroundImageResource);
 			
@@ -48,7 +48,7 @@ public class GuiChooseBlocksToBreak extends GuiScreen {
 			
 			super.drawScreen(mX, mY, partial);
 			
-			scrollable.draw(mX, mY);
+			//scrollable.draw(mX, mY);
 			
 			search.drawTextBox();
 			
@@ -165,7 +165,7 @@ public class GuiChooseBlocksToBreak extends GuiScreen {
 
 	@Override
 	protected void mouseClicked(int x, int y, int button) {
-		super.mouseClicked(x, y, button);
+		super.mouseClicked(x, y, button);		
 		scrollable.mousePress(x, y, button);
 		search.mouseClicked(x, y, button);
 	}
@@ -184,7 +184,7 @@ public class GuiChooseBlocksToBreak extends GuiScreen {
 		search_label = StatCollector.translateToLocal("cc.search");
 		int labelWidth = mc.fontRenderer.getStringWidth(search_label);
 		
-		scrollable = (GuiScrollableBlocks)new GuiScrollableBlocks(xPosition+4, yPosition+26, xSize-8, ySize-30, clone).setColourPallete(0x00000000, 0xffbbbbbb);
+		scrollable = (GuiScrollableBlocks)new GuiScrollableBlocks(xPosition+4, yPosition+26, xSize-8, ySize-30, clone).setColourPallete(0xff000000, 0xffbbbbbb);
 		search = new GuiTextField(mc.fontRenderer, xPosition+labelWidth+8, yPosition+4, xSize-12-labelWidth, 20);
 
 
