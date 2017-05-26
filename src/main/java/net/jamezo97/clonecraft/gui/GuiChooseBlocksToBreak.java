@@ -48,7 +48,7 @@ public class GuiChooseBlocksToBreak extends GuiScreen {
 			
 			super.drawScreen(mX, mY, partial);
 			
-			//scrollable.draw(mX, mY);
+			scrollable.draw(mX, mY);
 			
 			search.drawTextBox();
 			
