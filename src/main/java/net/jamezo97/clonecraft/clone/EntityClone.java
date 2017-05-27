@@ -2,12 +2,17 @@ package net.jamezo97.clonecraft.clone;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
+import com.google.common.collect.Multimap;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.jamezo97.clonecraft.CCPostRender;
 import net.jamezo97.clonecraft.CloneCraft;
 import net.jamezo97.clonecraft.GuiHandler;
@@ -79,13 +84,8 @@ import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemFood;
-import net.minecraft.item.ItemPickaxe;
-import net.minecraft.item.ItemShears;
-import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
 import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -110,11 +110,6 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeHooks;
-
-import com.google.common.collect.Multimap;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 
 public class EntityClone extends EntityLiving implements RenderableManager{
 	
@@ -2091,6 +2086,26 @@ public class EntityClone extends EntityLiving implements RenderableManager{
     	Material.cloth
     };
     
+private Comparator<ItemSelectEntry<Item>> itemDamageComparator = new Comparator<ItemSelectEntry<Item>>() {
+		
+		@Override
+		public int compare(ItemSelectEntry<Item> o1, ItemSelectEntry<Item> o2) {			
+			int item1MaxDamage =o1.theItem.getMaxDamage();
+			int item2MaxDamage =o2.theItem.getMaxDamage();	
+			if(item1MaxDamage < item2MaxDamage)
+			{
+				return -1;
+			}
+			else if(item1MaxDamage>item2MaxDamage)
+			{
+				return 1;
+			}
+			else
+			{			
+				return 0;
+			}
+		}
+	};
     /**
      * Tries to select the best item/tool in the clone's inventory for the given block
      * If it finds a tool, that is capable of harvesting the block, then it returns true.
@@ -2099,6 +2114,7 @@ public class EntityClone extends EntityLiving implements RenderableManager{
      * @param block The block you wish to break
      * @return True if the clone can currently break the block.
      */
+    
     public boolean selectBestItemForBlock(ChunkCoordinates theCoords, Block block, int meta, boolean actuallySelectIt)
     {
     	if(block == Blocks.air)
@@ -2112,33 +2128,74 @@ public class EntityClone extends EntityLiving implements RenderableManager{
     	{
     		return false;
     	}
+    	if(material.isToolNotRequired())
+    	{
+    		//By this point, there is no specific tool we want to use.
+    		//So just fists will do.
+    		//To avoid damaging good items that don't need to be used,
+    		//try to select an empty slot, or at least make one.
+
+    		if(actuallySelectIt)
+    		{
+        		this.inventory.trySelectEmptySlot();
+    		}
+    		return true;
+    	}
+    	//int harvestLevel= block.getHarvestLevel(meta);
+    	//String harvestToolType = block.getHarvestTool(meta);
+    	ArrayList<ItemSelectEntry<Item>> itemList = new ArrayList<ItemSelectEntry<Item>>();
+    	for(int a = 0; a < this.inventory.mainInventory.length; a++)
+    	{    		
+    		ItemStack theStack = this.inventory.mainInventory[a];
+    		if(theStack ==null)
+    		{
+    			continue;
+    		}
+    		Item item = theStack.getItem();
+    		//item.getDam
+    		if(theStack != null && item.canHarvestBlock(block, theStack))
+    		{    			
+    			ItemSelectEntry<Item> entry = new ItemSelectEntry<Item>(a,theStack,item);
+    			itemList.add(entry);
+    		}
+//    		if(theStack != null)
+//    		{
+//    			if(theStack.getItem() != null && type.isAssignableFrom(theStack.getItem().getClass()))
+//    			{
+//    				ItemSelectEntry<E> entry = new ItemSelectEntry<E>(a, theStack, (E) theStack.getItem());
+//    				list.add(entry);
+//    			}
+//    		}
+    	}
     	
-    	ArrayList<ItemSelectEntry> itemList = new ArrayList<ItemSelectEntry>();
-    	if(isMaterial(pickaxeMaterials, material))
-    	{
-    		ArrayList<ItemSelectEntry<ItemPickaxe>> list = this.selectItemByClass(ItemPickaxe.class);
-    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
-    	}
-    	else if(isMaterial(axeMaterials, material))
-    	{
-    		ArrayList<ItemSelectEntry<ItemAxe>> list = this.selectItemByClass(ItemAxe.class);
-    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
-    	}
-    	else if(isMaterial(shovelMaterials, material))
-    	{
-    		ArrayList<ItemSelectEntry<ItemSpade>> list = this.selectItemByClass(ItemSpade.class);
-    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
-    	}
-    	else if(isMaterial(swordMaterials, material))
-    	{
-    		ArrayList<ItemSelectEntry<ItemSword>> list = this.selectItemByClass(ItemSword.class);
-    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
-    	}
-    	else if(isMaterial(shearMaterials, material))
-    	{
-    		ArrayList<ItemSelectEntry<ItemShears>> list = this.selectItemByClass(ItemShears.class);
-    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
-    	}
+    	itemList.sort(itemDamageComparator);
+    	//ArrayList<ItemSelectEntry<ItemPickaxe>> list = this.selectItemByClass(ItemPickaxe.class);
+    	
+//    	if(isMaterial(pickaxeMaterials, material))
+//    	{
+//    		ArrayList<ItemSelectEntry<ItemPickaxe>> list = this.selectItemByClass(ItemPickaxe.class);
+//    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
+//    	}
+//    	else if(isMaterial(axeMaterials, material))
+//    	{
+//    		ArrayList<ItemSelectEntry<ItemAxe>> list = this.selectItemByClass(ItemAxe.class);
+//    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
+//    	}
+//    	else if(isMaterial(shovelMaterials, material))
+//    	{
+//    		ArrayList<ItemSelectEntry<ItemSpade>> list = this.selectItemByClass(ItemSpade.class);
+//    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
+//    	}
+//    	else if(isMaterial(swordMaterials, material))
+//    	{
+//    		ArrayList<ItemSelectEntry<ItemSword>> list = this.selectItemByClass(ItemSword.class);
+//    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
+//    	}
+//    	else if(isMaterial(shearMaterials, material))
+//    	{
+//    		ArrayList<ItemSelectEntry<ItemShears>> list = this.selectItemByClass(ItemShears.class);
+//    		for(int a = 0; a < list.size(); a++){itemList.add(list.get(a));}
+//    	}
     	
     	for(int a = 0; a < itemList.size(); a++)
     	{
@@ -2161,7 +2218,7 @@ public class EntityClone extends EntityLiving implements RenderableManager{
     	if(itemList.size() > 0)
     	{
     		
-    		Collections.sort(itemList);
+    		//Collections.sort(itemList);
     		if(actuallySelectIt)
     		{
         		int slot = inventory.putStackOnHotbar(itemList.get(itemList.size()-1).inventoryIndex);
@@ -2170,19 +2227,7 @@ public class EntityClone extends EntityLiving implements RenderableManager{
     		return true;
     	}
     	
-    	if(material.isToolNotRequired())
-    	{
-    		//By this point, there is no specific tool we want to use.
-    		//So just fists will do.
-    		//To avoid damaging good items that don't need to be used,
-    		//try to select an empty slot, or at least make one.
-
-    		if(actuallySelectIt)
-    		{
-        		this.inventory.trySelectEmptySlot();
-    		}
-    		return true;
-    	}
+    	
     	
     	return false;
     }
@@ -2206,7 +2251,16 @@ public class EntityClone extends EntityLiving implements RenderableManager{
 		}
 		return true;
     }
-    
+//    public static class ItemSelectEntryDamageComparator<Item> implements Comparator<Item>
+//    {
+//
+//		@Override
+//		public int compare(Item o1, Item o2) {
+//			// TODO Auto-generated method stub
+//			return 0;
+//		}
+//    	
+//    }
     public static class ItemSelectEntry<E extends Item> implements Comparable<ItemSelectEntry>{
 
     	public E theItem;

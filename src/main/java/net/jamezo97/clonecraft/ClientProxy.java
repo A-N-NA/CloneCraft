@@ -91,7 +91,7 @@ public class ClientProxy extends CommonProxy{
 		
 		Reflect.init(Side.CLIENT);
 		
-		BreakableBlocks.loadBlocksClient();
+		//BreakableBlocks.loadBlocksClient();
 	}
 
 	@Override
