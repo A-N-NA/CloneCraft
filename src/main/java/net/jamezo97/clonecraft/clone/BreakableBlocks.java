@@ -12,6 +12,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockOre;
 import net.minecraft.block.IGrowable;
+import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -104,7 +105,8 @@ public class BreakableBlocks
 		try
 		{
 			Block block = clone.worldObj.getBlock(x, y, z);
-			if (block == Blocks.air || (block.getMaterial() != null && block.getMaterial().isLiquid()))
+			Material blockMaterial = block.getMaterial();
+			if (block == Blocks.air || (blockMaterial != null && blockMaterial.isLiquid()))
 			{
 				return false;
 			}
@@ -253,7 +255,7 @@ public class BreakableBlocks
 
 			if (block != null)
 			{
-				if (block instanceof BlockOre)
+				if (block instanceof BlockOre || block.getClass().toString().contains("Ore") || block.getLocalizedName().contains("Ore"))
 				{
 					this.set(validBlocksArray[a], true);
 				}

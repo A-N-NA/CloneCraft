@@ -253,10 +253,12 @@ public class EntityClone extends EntityLiving implements RenderableManager{
 		this.tasks.addTask(4, aiCommand = new EntityAICommand(this));
 		
 		this.tasks.addTask(5, aiFetch = new EntityAIFetchItemStack(this));
+		this.tasks.addTask(6, new EntityAICloneWalkToItems(this));
 		
-		this.tasks.addTask(6, aiBreakBlocks = new EntityAIMine(this));
-		this.tasks.addTask(7, aiBuild = new EntityAIBuild(this));
-		this.tasks.addTask(8, new EntityAICloneWalkToItems(this));
+		this.tasks.addTask(7, aiBreakBlocks = new EntityAIMine(this));
+		this.tasks.addTask(8, aiBuild = new EntityAIBuild(this));
+		//this.tasks.addTask(8, new EntityAICloneWalkToItems(this));
+		
 		this.tasks.addTask(9, new EntityAIReturnGuard(this));
 		
 		this.tasks.addTask(18, aiShareItems = new EntityAIShare(this));
