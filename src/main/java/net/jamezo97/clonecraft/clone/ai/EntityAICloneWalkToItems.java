@@ -24,7 +24,7 @@ public class EntityAICloneWalkToItems extends EntityAIBase {
 	@Override
 	public boolean shouldExecute()
 	{
-		boolean states = itemToGet==null && clone.getOptions().pickUp.get() && clone.getOptions().walkToItems.get() && clone.getAttackTarget() == null && clone.getNavigator().noPath();
+		boolean states = clone.getOptions().pickUp.get() && clone.getOptions().walkToItems.get() && clone.getAttackTarget() == null && clone.getNavigator().noPath();
 		
 		if(states)
 		{
